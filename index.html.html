@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Конвертер комплексных чисел</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 25px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 22px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+        
+        .direction-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f0f2f5;
+            border-radius: 12px;
+            padding: 5px;
+        }
+        
+        .direction-btn {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .direction-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .direction-btn:hover:not(.active) {
+            color: #333;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+        
+        .label-hint {
+            font-weight: 400;
+            color: #999;
+            font-size: 13px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: border-color 0.3s;
+            outline: none;
+            background: #fafafa;
+            -webkit-appearance: none;
+        }
+        
+        input:focus {
+            border-color: #667eea;
+            background: white;
+        }
+        
+        .button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 5px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            display: none;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result.show {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-line {
+            padding: 8px 0;
+            font-size: 15px;
+            color: #333;
+            word-break: break-all;
+        }
+        
+        .result-line strong {
+            color: #555;
+        }
+        
+        .result-value {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .result-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #444;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e8e8e8;
+            padding-bottom: 8px;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background: #fde8e8;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            font-weight: 500;
+        }
+        
+        .error.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .formula {
+            font-size: 18px;
+            font-weight: 500;
+            padding: 4px 0;
+        }
+        
+        .formula sup {
+            font-size: 14px;
+            color: #667eea;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 18px;
+            }
+            
+            h1 {
+                font-size: 19px;
+            }
+            
+            input {
+                font-size: 16px;
+                padding: 12px 14px;
+            }
+            
+            .button {
+                font-size: 16px;
+                padding: 14px;
+            }
+            
+            .result-line {
+                font-size: 14px;
+            }
+            
+            .direction-btn {
+                font-size: 12px;
+                padding: 10px 5px;
+            }
+            
+            .formula {
+                font-size: 16px;
+            }
+            
+            .formula sup {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Конвертер комплексных чисел</h1>
+        <div class="subtitle">Перевод между алгебраической и показательной формами</div>
+        
+        <div class="direction-selector">
+            <button class="direction-btn active" data-mode="toExp" onclick="setMode('toExp')">
+                x + jy → r·e<sup> j·φ°</sup>
+            </button>
+            <button class="direction-btn" data-mode="toAlg" onclick="setMode('toAlg')">
+                r·e<sup> j·φ°</sup> → x + jy
+            </button>
+        </div>
+        
+        <div id="modeToExp">
+            <div class="input-group">
+                <label>Действительная часть (x)</label>
+                <input type="number" id="real" step="any" placeholder="Например: 3" value="3">
+            </div>
+            
+            <div class="input-group">
+                <label>Мнимая часть (y)</label>
+                <input type="number" id="imag" step="any" placeholder="Например: 4" value="4">
+            </div>
+        </div>
+        
+        <div id="modeToAlg" style="display: none;">
+            <div class="input-group">
+                <label>Модуль (r)</label>
+                <input type="number" id="amplitude" step="any" placeholder="Например: 5" value="5">
+            </div>
+            
+            <div class="input-group">
+                <label>Угол (φ) <span class="label-hint">— градусы</span></label>
+                <input type="number" id="angle" step="any" placeholder="Например: 53.13" value="53.13">
+            </div>
+        </div>
+        
+        <button class="button" onclick="calculate()">🚀 Перевести</button>
+        
+        <div class="error" id="errorMsg">⚠️ Введите корректные числа!</div>
+        
+        <div class="result" id="result">
+            <div class="result-title">Результат</div>
+            <div id="resultContent"></div>
+        </div>
+        
+    </div>
+
+    <script>
+        let currentMode = 'toExp';
+        
+        function setMode(mode) {
+            currentMode = mode;
+            
+            document.querySelectorAll('.direction-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+            
+            document.getElementById('modeToExp').style.display = mode === 'toExp' ? 'block' : 'none';
+            document.getElementById('modeToAlg').style.display = mode === 'toAlg' ? 'block' : 'none';
+            
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('errorMsg').classList.remove('show');
+        }
+        
+        function calculate() {
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('errorMsg');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultDiv.classList.remove('show');
+            errorDiv.classList.remove('show');
+            
+            if (currentMode === 'toExp') {
+                const x = parseFloat(document.getElementById('real').value);
+                const y = parseFloat(document.getElementById('imag').value);
+                
+                if (isNaN(x) || isNaN(y)) {
+                    errorDiv.classList.add('show');
+                    return;
+                }
+                
+                const a = Math.sqrt(x * x + y * y);
+                const bRad = Math.atan2(y, x);
+                let bDeg = bRad * (180 / Math.PI);
+                
+                const aRound = Math.round(a * 1000000) / 1000000;
+                const bRound = Math.round(bDeg * 1000000) / 1000000;
+                
+                if (Math.abs(a) < 0.0000000001) {
+                    resultContent.innerHTML = `
+                        <div class="result-line"><strong>Результат:</strong> 0</div>
+                    `;
+                } else {
+                    resultContent.innerHTML = `
+                        <div class="result-line"><strong>Исходная форма:</strong> ${x} + j${y}</div>
+                        <div class="result-line" style="border-top: 1px dashed #ddd; margin-top: 8px; padding-top: 12px;">
+                            <strong>Показательная форма:</strong> 
+                            <span class="result-value formula">${aRound} · e<sup> j·${bRound}°</sup></span>
+                        </div>
+                    `;
+                }
+                
+            } else {
+                const a = parseFloat(document.getElementById('amplitude').value);
+                const bDeg = parseFloat(document.getElementById('angle').value);
+                
+                if (isNaN(a) || isNaN(bDeg)) {
+                    errorDiv.classList.add('show');
+                    return;
+                }
+                
+                const bRad = bDeg * (Math.PI / 180);
+                const x = a * Math.cos(bRad);
+                const y = a * Math.sin(bRad);
+                
+                const xRound = Math.round(x * 1000000) / 1000000;
+                const yRound = Math.round(y * 1000000) / 1000000;
+                const aRound = Math.round(a * 1000000) / 1000000;
+                const bRound = Math.round(bDeg * 1000000) / 1000000;
+                
+                if (Math.abs(a) < 0.0000000001) {
+                    resultContent.innerHTML = `
+                        <div class="result-line"><strong>Результат:</strong> 0</div>
+                    `;
+                } else {
+                    let imagStr;
+                    if (yRound >= 0) {
+                        imagStr = `+ j${yRound}`;
+                    } else {
+                        imagStr = `- j${Math.abs(yRound)}`;
+                    }
+                    
+                    resultContent.innerHTML = `
+                        <div class="result-line"><strong>Исходная форма:</strong> <span class="formula">${aRound} · e<sup> j·${bRound}°</sup></span></div>
+                        <div class="result-line" style="border-top: 1px dashed #ddd; margin-top: 8px; padding-top: 12px;">
+                            <strong>Алгебраическая форма:</strong> 
+                            <span class="result-value formula">${xRound} ${imagStr}</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            resultDiv.classList.add('show');
+        }
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                calculate();
+            }
+        });
+        
+        window.onload = function() {
+            calculate();
+        };
+        
+        // ФИКС ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
+        // Добавляем обработку касаний для всех кнопок
+        document.addEventListener('DOMContentLoaded', function() {
+            // Находим все кнопки с onclick
+            const buttons = document.querySelectorAll('[onclick]');
+            
+            buttons.forEach(function(button) {
+                // Добавляем обработку касания
+                button.addEventListener('touchstart', function(e) {
+                    // Получаем функцию из onclick
+                    const onclickFunc = button.getAttribute('onclick');
+                    if (onclickFunc) {
+                        // Выполняем функцию
+                        eval(onclickFunc);
+                    }
+                }, { passive: true });
+            });
+            
+            // Фикс для кнопок направлений (они тоже должны работать)
+            document.querySelectorAll('.direction-btn').forEach(function(btn) {
+                btn.addEventListener('touchstart', function(e) {
+                    const mode = this.getAttribute('data-mode');
+                    if (mode) {
+                        setMode(mode);
+                    }
+                }, { passive: true });
+            });
+        });
+    </script>
+</body>
+</html>
